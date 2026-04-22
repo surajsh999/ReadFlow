@@ -1,0 +1,1360 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReadFlow Trainer</title>
+    <link rel="manifest" href="manifest.json">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.122/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.21/mammoth.browser.min.js"></script>
+    <style>
+        :root {
+            --bg: #f8fafc;
+            --surface: rgba(255, 255, 255, 0.92);
+            --surface-strong: rgba(255, 255, 255, 0.98);
+            --text: #202945;
+            --muted: #6b7280;
+            --accent: #1a73e8;
+            --accent-strong: #5692ff;
+            --button-bg: linear-gradient(135deg, #1a73e8, #5692ff);
+            --button-text: #0f172a;
+            --panel: rgba(255, 255, 255, 0.75);
+            --border: rgba(26, 115, 232, 0.18);
+            --shadow: 0 24px 64px rgba(15, 23, 42, 0.08);
+            --body-bg: linear-gradient(180deg, #f8fbff 0%, #eef4ff 45%, #f8fbff 100%);
+            --reader-bg: rgba(232, 246, 255, 0.92);
+            --glow-1: rgba(26, 115, 232, 0.12);
+            --glow-2: rgba(255, 255, 255, 0.6);
+            --glow-3: rgba(26, 115, 232, 0.08);
+            --font-family: 'Inter', system-ui, sans-serif;
+            --font-size: 24px;
+            --line-height: 1.7;
+        }
+
+        [data-theme="dark"] {
+            --bg: #0f172a;
+            --surface: rgba(15, 23, 42, 0.9);
+            --surface-strong: rgba(10, 16, 28, 0.96);
+            --text: #e2e8f0;
+            --muted: #94a3b8;
+            --accent: #60a5fa;
+            --accent-strong: #93c5fd;
+            --button-bg: linear-gradient(135deg, #2563eb, #60a5fa);
+            --button-text: #f8fafc;
+            --panel: rgba(15, 23, 42, 0.82);
+            --border: rgba(96, 165, 250, 0.16);
+            --shadow: 0 24px 64px rgba(15, 23, 42, 0.24);
+            --body-bg: linear-gradient(180deg, #020617 0%, #0b1220 40%, #111b33 100%);
+            --reader-bg: rgba(30, 41, 59, 0.92);
+            --glow-1: rgba(96, 165, 250, 0.14);
+            --glow-2: rgba(226, 232, 240, 0.12);
+            --glow-3: rgba(96, 165, 250, 0.08);
+        }
+
+        [data-theme="sepia"] {
+            --bg: #fbf3e7;
+            --surface: rgba(255, 251, 244, 0.92);
+            --surface-strong: rgba(255, 250, 240, 0.98);
+            --text: #40392b;
+            --muted: #7d6d53;
+            --accent: #c27a2f;
+            --accent-strong: #e0a55f;
+            --button-bg: linear-gradient(135deg, #c27a2f, #e0a55f);
+            --button-text: #2f2415;
+            --panel: rgba(255, 250, 240, 0.82);
+            --border: rgba(194, 122, 47, 0.18);
+            --shadow: 0 24px 64px rgba(92, 72, 46, 0.12);
+            --body-bg: linear-gradient(180deg, #fff8ee 0%, #f7ede0 45%, #fdf8ee 100%);
+            --reader-bg: rgba(250, 241, 229, 0.92);
+            --glow-1: rgba(194, 122, 47, 0.12);
+            --glow-2: rgba(255, 255, 255, 0.6);
+            --glow-3: rgba(194, 122, 47, 0.08);
+        }
+
+        [data-theme="cyberpunk"] {
+            --bg: #0a0e27;
+            --surface: rgba(15, 20, 46, 0.92);
+            --surface-strong: rgba(10, 14, 35, 0.98);
+            --text: #00ffff;
+            --muted: #7ffaff;
+            --accent: #ff006e;
+            --accent-strong: #ff38a8;
+            --button-bg: linear-gradient(135deg, #ff006e, #ff38a8);
+            --button-text: #f8fafc;
+            --panel: rgba(15, 20, 46, 0.85);
+            --border: rgba(0, 255, 255, 0.25);
+            --shadow: 0 24px 64px rgba(255, 0, 110, 0.16);
+            --body-bg: linear-gradient(180deg, #0a0e27 0%, #1a0033 40%, #0f1d3d 100%);
+            --reader-bg: rgba(20, 25, 50, 0.92);
+            --glow-1: rgba(0, 255, 255, 0.15);
+            --glow-2: rgba(255, 0, 110, 0.12);
+            --glow-3: rgba(0, 255, 255, 0.08);
+        }
+
+        [data-theme="synthwave"] {
+            --bg: #16213e;
+            --surface: rgba(25, 32, 60, 0.92);
+            --surface-strong: rgba(20, 26, 50, 0.98);
+            --text: #ffd60a;
+            --muted: #ffb703;
+            --accent: #ff006e;
+            --accent-strong: #ff38a8;
+            --button-bg: linear-gradient(135deg, #ff006e, #ffd60a);
+            --button-text: #16213e;
+            --panel: rgba(25, 32, 60, 0.85);
+            --border: rgba(255, 214, 10, 0.20);
+            --shadow: 0 24px 64px rgba(255, 0, 110, 0.15);
+            --body-bg: linear-gradient(180deg, #16213e 0%, #370055 40%, #1d3557 100%);
+            --reader-bg: rgba(35, 42, 70, 0.92);
+            --glow-1: rgba(255, 214, 10, 0.12);
+            --glow-2: rgba(255, 0, 110, 0.10);
+            --glow-3: rgba(255, 214, 10, 0.06);
+        }
+
+        [data-theme="neo"] {
+            --bg: #0d1117;
+            --surface: rgba(20, 25, 40, 0.92);
+            --surface-strong: rgba(15, 20, 33, 0.98);
+            --text: #58a6ff;
+            --muted: #8b949e;
+            --accent: #79c0ff;
+            --accent-strong: #a0d8ff;
+            --button-bg: linear-gradient(135deg, #58a6ff, #79c0ff);
+            --button-text: #0d1117;
+            --panel: rgba(20, 25, 40, 0.85);
+            --border: rgba(88, 166, 255, 0.20);
+            --shadow: 0 24px 64px rgba(88, 166, 255, 0.10);
+            --body-bg: linear-gradient(180deg, #0d1117 0%, #1a2332 40%, #0f1b2e 100%);
+            --reader-bg: rgba(25, 32, 50, 0.92);
+            --glow-1: rgba(88, 166, 255, 0.12);
+            --glow-2: rgba(88, 166, 255, 0.08);
+            --glow-3: rgba(88, 166, 255, 0.04);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: var(--font-family);
+        }
+
+        html, body {
+            min-height: 100%;
+            height: 100%;
+        }
+
+        body {
+            background: var(--body-bg);
+            color: var(--text);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            min-height: 100vh;
+            height: 100vh
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle at 20% 20%, var(--glow-1), transparent 16%),
+                        radial-gradient(circle at 80% 15%, var(--glow-2), transparent 12%),
+                        radial-gradient(circle at 50% 75%, var(--glow-3), transparent 18%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .toolbar {
+            position: relative;
+            z-index: 2;
+            background: var(--surface);
+            color: var(--text);
+            backdrop-filter: blur(18px);
+            border: 1px solid var(--border);
+            border-radius: 28px;
+            padding: 18px 22px;
+            margin: 20px;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            gap: 16px;
+            box-shadow: var(--shadow);
+        }
+
+        .toolbar.reader-minimized {
+            padding: 6px 10px;
+            margin: 10px 10px 8px;
+            border-radius: 16px;
+            gap: 6px;
+            background: var(--surface);
+        }
+
+        .toolbar.reader-minimized .toolbar-left,
+        .toolbar.reader-minimized .toolbar-center,
+        .toolbar.reader-minimized .toolbar-right {
+            gap: 6px;
+        }
+
+        .toolbar.reader-minimized .toolbar-top {
+            align-items: center;
+        }
+
+        .toolbar.reader-minimized .toolbar-top .toolbar-center {
+            flex: 1 1 100%;
+            justify-content: flex-start;
+        }
+
+        .toolbar.reader-minimized .toolbar-left button,
+        .toolbar.reader-minimized .toolbar-bottom button,
+        .toolbar.reader-minimized .control-pill {
+            padding: 8px 10px;
+            min-height: 34px;
+            font-size: 13px;
+        }
+
+        .toolbar.reader-minimized .control-pill {
+            min-width: 120px;
+            padding: 6px 8px;
+        }
+
+        .toolbar.reader-minimized .control-pill label {
+            font-size: 12px;
+        }
+
+        .toolbar.reader-minimized .toolbar-bottom {
+            border-top: none;
+            padding-top: 0;
+        }
+
+        .toolbar.reader-minimized .status-bar {
+            opacity: 0.9;
+            font-size: 12px;
+        }
+
+        .toolbar-top {
+            display: flex;
+            gap: 14px;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: nowrap;
+            width: 100%;
+            min-width: 0;
+        }
+
+        .toolbar-bottom {
+            padding-top: 14px;
+            border-top: 1px solid var(--border);
+        }
+
+        .toolbar-left,
+        .toolbar-center,
+        .toolbar-right {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: nowrap;
+            min-width: 0;
+        }
+
+        .toolbar-left {
+            flex: 0 0 auto;
+        }
+
+        .toolbar-center {
+            flex: 0 0 auto;
+            justify-content: center;
+            min-width: 240px;
+        }
+
+        .toolbar-right {
+            flex: 0 0 auto;
+            justify-content: flex-end;
+            min-width: 180px;
+        }
+
+        .toolbar-top .status-bar,
+        .toolbar-bottom .controls-group {
+            min-width: 0;
+        }
+
+        .control-pill {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 14px 16px;
+            border-radius: 18px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text);
+            min-width: 180px;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            accent-color: var(--accent);
+            background: linear-gradient(to right, var(--accent-strong) 0%, var(--accent-strong) 50%, rgba(107, 114, 128, 0.2) 50%, rgba(107, 114, 128, 0.2) 100%);
+            background-size: 100% 100%;
+            background-repeat: no-repeat;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-runnable-track {
+            height: 12px;
+            border-radius: 999px;
+            background: rgba(107, 114, 128, 0.15);
+            border: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: var(--accent-strong);
+            border: 3px solid var(--surface);
+            cursor: pointer;
+            box-shadow: 0 0 12px var(--accent), 0 0 0 8px var(--glow-1);
+            margin-top: -7px;
+        }
+
+        input[type="range"]::-moz-range-track {
+            height: 12px;
+            border-radius: 999px;
+            background: rgba(107, 114, 128, 0.15);
+            border: none;
+        }
+
+        input[type="range"]::-moz-range-progress {
+            background: var(--accent-strong);
+            height: 12px;
+            border-radius: 999px;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: var(--accent-strong);
+            border: 3px solid var(--surface);
+            cursor: pointer;
+            box-shadow: 0 0 12px var(--accent), 0 0 0 8px var(--glow-1);
+        }
+
+        #text-content {
+            max-width: 760px;
+            margin: 0 auto;
+            text-align: left;
+        }
+
+        input[type="color"] {
+            padding: 0;
+            width: 46px;
+            height: 46px;
+            border-radius: 16px;
+        }
+
+        input[type="file"] {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 180px;
+            color: transparent;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            padding: 12px 18px;
+            box-shadow: none;
+            cursor: pointer;
+            transition: transform 0.2s ease, background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+            font-weight: 700;
+            letter-spacing: 0.01em;
+            height: 44px;
+            font-size: 0;
+        }
+
+        #file-input-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        #file-name-display {
+            font-size: 13px;
+            color: var(--muted);
+            text-align: center;
+            min-height: 18px;
+            word-break: break-all;
+            max-width: 180px;
+        }
+
+        input[type="file"]::-webkit-file-upload-button {
+            visibility: hidden;
+        }
+
+        input[type="file"]::before {
+            content: 'Attach file';
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 0 4px;
+            color: var(--text);
+            font-size: 14px;
+        }
+
+        input[type="file"]:hover {
+            transform: translateY(-1px);
+            border-color: rgba(255,255,255,0.38);
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.12), 0 20px 60px rgba(0,0,0,0.12);
+            background: linear-gradient(145deg, rgba(255,255,255,0.25), rgba(255,255,255,0.12));
+        }
+
+        input[type="file"]:active {
+            transform: translateY(0);
+            background: linear-gradient(145deg, rgba(255,255,255,0.14), rgba(255,255,255,0.06));
+        }
+
+        .controls-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        button {
+            background: var(--button-bg);
+            color: var(--button-text);
+            border: none;
+            padding: 12px 18px;
+            border-radius: 999px;
+            cursor: pointer;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            transition: transform 0.2s ease, opacity 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+            box-shadow: var(--shadow);
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+            opacity: 0.96;
+        }
+
+        button.secondary {
+            background: var(--surface);
+            color: var(--text);
+            border: 1px solid var(--border);
+            box-shadow: none;
+        }
+
+        .toggle-button.active {
+            background: var(--accent);
+            color: var(--button-text);
+            box-shadow: 0 10px 28px var(--glow-1);
+        }
+
+        input[type="range"], input[type="number"], select, input[type="file"], input[type="color"] {
+            appearance: none;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--text);
+            padding: 12px 14px;
+            min-height: 44px;
+            transition: border-color 0.2s ease, background 0.2s ease;
+        }
+
+       
+
+        input[type="number"] {
+            width: 108px;
+        }
+
+        input[type="file"] {
+            cursor: pointer;
+        }
+
+        textarea {
+            width: 100%;
+            flex: 1;
+            min-height: 230px;
+            padding: 24px;
+            border-radius: 24px;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--text);
+            resize: none;
+            font-size: 16px;
+            line-height: 1.8;
+            box-shadow: inset 0 0 0 1px var(--border);
+        }
+
+        .toolbar label,
+        .status-bar {
+            color: var(--muted);
+        }
+
+        #setup-area {
+            flex: 1;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            max-width: 980px;
+            margin: 0 auto 28px;
+            width: calc(100% - 44px);
+            overflow-y: auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        #setup-area h2 {
+            font-size: clamp(2rem, 3vw, 2.8rem);
+            color: var(--text);
+            letter-spacing: -0.04em;
+        }
+
+        #setup-area p {
+            color: var(--muted);
+            max-width: 680px;
+            line-height: 1.8;
+        }
+
+        #reader-area {
+            display: none;
+            flex: 1;
+            flex-direction: column;
+            min-height: calc(100vh - 230px);
+            position: relative;
+            overflow: hidden;
+            margin: 0 22px 22px;
+            border-radius: 32px;
+            background: var(--reader-bg);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+        }
+
+        .reader-container {
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 48px;
+            position: relative;
+            width: 100%;
+            height: 100%;
+            scrollbar-width: thin;
+            scrollbar-color: var(--accent-strong) var(--surface);
+        }
+
+        .reader-container::-webkit-scrollbar {
+            width: 14px;
+        }
+
+        .reader-container::-webkit-scrollbar-track {
+            background: var(--surface);
+            border-radius: 999px;
+        }
+
+        .reader-container::-webkit-scrollbar-thumb {
+            background: var(--accent-strong);
+            border-radius: 999px;
+            border: 4px solid transparent;
+            background-clip: padding-box;
+        }
+
+        .reader-container::-webkit-scrollbar-thumb:hover {
+            background: var(--accent);
+        }
+
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: var(--accent-strong) var(--surface);
+        }
+
+        *::-webkit-scrollbar {
+            width: 14px;
+            height: 14px;
+        }
+
+        *::-webkit-scrollbar-track {
+            background: var(--surface);
+            border-radius: 999px;
+        }
+
+        *::-webkit-scrollbar-thumb {
+            background: var(--accent-strong);
+            border-radius: 999px;
+            border: 4px solid transparent;
+            background-clip: padding-box;
+        }
+
+        *::-webkit-scrollbar-thumb:hover {
+            background: var(--accent);
+        }
+
+        .focus-guide {
+            position: absolute;
+            left: 20%;
+            top: 0;
+            bottom: 0;
+            width: 58%;
+            background: var(--glow-1);
+            border-left: 1px solid var(--accent);
+            border-right: 1px solid var(--accent);
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0;
+            transition: opacity 0.3s, left 0.3s, width 0.3s;
+            mix-blend-mode: screen;
+        }
+
+        .focus-active .focus-guide {
+            opacity: 1;
+            pointer-events: auto;
+            cursor: grab;
+        }
+
+        .focus-active .focus-guide::before,
+        .focus-active .focus-guide::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            width: 18px;
+            height: 100%;
+            background: var(--accent);
+            opacity: 0.3;
+            cursor: ew-resize;
+        }
+
+        .focus-active .focus-guide::before {
+            left: 0;
+        }
+
+        .focus-active .focus-guide::after {
+            right: 0;
+        }
+
+        #text-content {
+            font-size: var(--font-size);
+            line-height: var(--line-height);
+            padding-bottom: 80vh;
+            color: var(--text);
+        }
+
+        .bionic b {
+            font-weight: 900;
+            color: var(--accent);
+        }
+
+        #rsvp-container {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--surface-strong);
+            align-items: center;
+            justify-content: center;
+            font-size: calc(var(--font-size) * 2);
+            font-weight: 800;
+            text-align: center;
+            z-index: 5;
+            color: var(--text);
+        }
+
+        .rsvp-active #reader-area .reader-container {
+            display: none;
+        }
+
+        .rsvp-active #rsvp-container {
+            display: flex;
+        }
+
+        @media (max-width: 900px) {
+            .toolbar {
+                margin: 18px;
+                padding: 18px;
+                justify-content: center;
+            }
+
+            #setup-area {
+                width: calc(100% - 36px);
+                padding: 20px;
+            }
+
+            .reader-container {
+                padding: 30px 22px;
+            }
+
+            input[type="range"] {
+                width: 160px;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .toolbar {
+                padding: 16px;
+            }
+
+            .controls-group {
+                width: auto;
+                justify-content: flex-start;
+            }
+
+            .toolbar label,
+            .status-bar {
+                width: auto;
+            }
+
+            button,
+            input[type="number"],
+            select,
+            input[type="file"] {
+                width: auto;
+                min-width: 0;
+                flex: none;
+            }
+
+            #rsvp-container {
+                font-size: calc(var(--font-size) * 1.4);
+                padding: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="toolbar">
+        <div class="toolbar-top">
+            <div class="toolbar-left controls-group">
+                <button id="btn-start">Load & Start</button>
+                <button id="btn-play" style="display:none;">Play</button>
+                <button id="btn-stop" class="secondary" style="display:none;">Stop</button>
+                <button id="btn-bionic" class="secondary toggle-button">Toggle Bionic</button>
+                <button id="btn-rsvp" class="secondary toggle-button">RSVP Mode</button>
+            </div>
+            <div class="toolbar-center controls-group">
+                <div id="wpm-control" style="display:none;" class="control-pill">
+                    <label>WPM: <span id="wpm-display">300</span></label>
+                    <input type="range" id="wpm-slider" min="60" max="1000" step="5" value="300">
+                </div>
+                <div id="manual-speed-control" style="display:none;" class="control-pill">
+                    <label for="manual-speed-input">Manual WPM:</label>
+                    <input type="number" id="manual-speed-input" min="60" max="1000" step="10" value="300">
+                </div>
+                <div id="text-size-control" style="display:none;" class="control-pill">
+                    <label for="text-size-slider">Text size: <span id="text-size-display">24</span>px</label>
+                    <input type="range" id="text-size-slider" min="18" max="42" step="2" value="24">
+                </div>
+            </div>
+            <div class="toolbar-right controls-group">
+                <div class="status-bar">
+                    <span id="word-count">Words: 0</span>
+                    <span id="time-estimate">Estimated time: 0 min</span>
+                </div>
+                <select id="theme-select">
+                    <option value="light">Light</option>
+                    <option value="dark">Dark</option>
+                    <option value="sepia">Sepia</option>
+                    <option value="cyberpunk">Cyberpunk</option>
+                    <option value="synthwave">Synthwave</option>
+                    <option value="neo">Neo</option>
+                </select>
+                <select id="font-select">
+                    <option value="'Inter', sans-serif">Sans-Serif</option>
+                    <option value="Calibri, sans-serif">Calibri</option>
+                    <option value="'Calibri Light', sans-serif">Calibri Light</option>
+                    <option value="'Bahnschrift Light', sans-serif">Bahnschrift Light</option>
+                    <option value="'Bradley Hand ITC', cursive">Bradley Hand ITC</option>
+                    <option value="'Comic Sans MS', cursive">Comic Sans MS</option>
+                    <option value="Consolas, monospace">Consolas</option>
+                    <option value="Constantia, serif">Constantia</option>
+                    <option value="Gabriola, fantasy">Gabriola</option>
+                    <option value="'Segoe Print', cursive">Segoe Print</option>
+                    <option value="'Segoe Script', cursive">Segoe Script</option>
+                    <option value="'Georgia', serif">Serif</option>
+                    <option value="monospace">Monospace</option>
+                </select>
+                <label for="accent-color-picker">Accent</label>
+                <input type="color" id="accent-color-picker" value="#1A73E8">
+            </div>
+        </div>
+    </div>
+
+    <div id="setup-area">
+        <h2>Welcome to ReadFlow Trainer</h2>
+        <p>Paste your text below or load a TXT/PDF/DOCX file to begin training.</p>
+        <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:flex-start;">
+            <div id="file-input-wrapper">
+                <input type="file" id="file-input" accept=".txt,.pdf,.doc,.docx,.rtf">
+                <div id="file-name-display"></div>
+            </div>
+            <button id="btn-paste" class="secondary">Paste from Clipboard</button>
+        </div>
+        <textarea id="text-input" placeholder="Paste your text here..."></textarea>
+    </div>
+
+    <div id="reader-area">
+        <div class="focus-guide"></div>
+        <div class="reader-container" id="scroll-container">
+            <div id="text-content"></div>
+        </div>
+        <div id="rsvp-container">Word</div>
+    </div>
+
+    <script>
+        // State
+        let isPlaying = false;
+        let isBionic = false;
+        let isRSVP = false;
+        let wpm = 300;
+        let textSize = 24;
+        let words = [];
+        let rsvpIndex = 0;
+        let rsvpTimer = null;
+        let scrollTimer = null;
+        let lastScrollTime = 0; 
+        let scrollStartAttempts = 0;
+
+        const setupArea = document.getElementById('setup-area');
+        const readerArea = document.getElementById('reader-area');
+        const textInput = document.getElementById('text-input');
+        const textContent = document.getElementById('text-content');
+        const scrollContainer = document.getElementById('scroll-container');
+        const scrollTarget = scrollContainer;
+        const rsvpContainer = document.getElementById('rsvp-container');
+        const wpmSlider = document.getElementById('wpm-slider');
+        const wpmDisplay = document.getElementById('wpm-display');
+        const btnPlay = document.getElementById('btn-play');
+        const toolbar = document.querySelector('.toolbar');
+        const manualSpeedInput = document.getElementById('manual-speed-input');
+        const textSizeSlider = document.getElementById('text-size-slider');
+        const textSizeDisplay = document.getElementById('text-size-display');
+        const wordCountDisplay = document.getElementById('word-count');
+        const timeEstimateDisplay = document.getElementById('time-estimate');
+        const accentColorPicker = document.getElementById('accent-color-picker');
+        const btnPaste = document.getElementById('btn-paste');
+        if (window.pdfjsLib) {
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.122/pdf.worker.min.js';
+        }
+
+        // Text Processing & Bionic Converter
+        function processText(rawText) {
+            if(!rawText.trim()) return;
+            const paragraphs = rawText.split('\n').filter(p => p.trim());
+            words = rawText.split(/\s+/).filter(w => w.trim());
+            const html = paragraphs.map(p => {
+                const pWords = p.split(/\s+/).filter(w => w.trim());
+                const mappedWords = pWords.map(word => {
+                    const splitPoint = Math.ceil(word.length / 2);
+                    const bionic = `<b>${word.substring(0, splitPoint)}</b>${word.substring(splitPoint)}`;
+                    return `<span class="word" data-raw="${word}" data-bionic="${bionic}">${word}</span>`;
+                });
+                return `<p style="margin-bottom: 1em;">${mappedWords.join(' ')}</p>`;
+            }).join('');   
+            textContent.innerHTML = html;
+            updateBionic();
+            updateStatus();
+        }
+
+        function updateBionic() {
+            const wordSpans = textContent.querySelectorAll('.word');
+            wordSpans.forEach(span => {
+                span.innerHTML = isBionic ? span.dataset.bionic : span.dataset.raw;
+            });
+            textContent.className = isBionic ? 'bionic' : '';
+        }
+
+        function updateStatus() {
+            const count = words.length;
+            wordCountDisplay.textContent = `Words: ${count}`;
+            const estimate = count > 0 && wpm ? Math.max(1, Math.ceil(count / wpm)) : 0;
+            timeEstimateDisplay.textContent = `Estimated time: ${estimate} min`;
+        }
+
+        function applyTextSize(size) {
+            textSize = size;
+            document.documentElement.style.setProperty('--font-size', `${textSize}px`);
+            textSizeDisplay.textContent = textSize;
+        }
+
+        function saveSettings() {
+            localStorage.setItem('readflow-state', JSON.stringify({
+                text: textInput.value,
+                theme: document.documentElement.getAttribute('data-theme') || 'light',
+                font: document.documentElement.style.getPropertyValue('--font-family') || "'Inter', sans-serif",
+                wpm,
+                textSize,
+                accentColor: accentColorPicker.value,
+                isBionic,
+                isRSVP
+            }));
+        }
+
+        function loadSettings() {
+            const saved = localStorage.getItem('readflow-state');
+            if (!saved) return;
+            try {
+                const state = JSON.parse(saved);
+                if (state.text) {
+                    textInput.value = state.text;
+                    processText(state.text);
+                }
+                if (state.theme) {
+                    document.documentElement.setAttribute('data-theme', state.theme);
+                    document.getElementById('theme-select').value = state.theme;
+                }
+                if (state.font) {
+                    document.documentElement.style.setProperty('--font-family', state.font);
+                    document.getElementById('font-select').value = state.font;
+                }
+                if (state.wpm) {
+                    wpm = Number(state.wpm);
+                    wpmSlider.value = wpm;
+                    manualSpeedInput.value = wpm;
+                    wpmDisplay.textContent = wpm;
+                }
+                if (state.textSize) {
+                    applyTextSize(Number(state.textSize));
+                    textSizeSlider.value = textSize;
+                }
+                if (state.accentColor) {
+                    accentColorPicker.value = state.accentColor;
+                    document.documentElement.style.setProperty('--accent', state.accentColor);
+                    document.documentElement.style.setProperty('--accent-strong', brightenHex(state.accentColor, 24));
+                }
+                if (state.isBionic) {
+                    isBionic = true;
+                    updateBionic();
+                    document.getElementById('btn-bionic').classList.add('active');
+                }
+                if (state.isRSVP) {
+                    isRSVP = true;
+                    document.body.classList.add('rsvp-active');
+                    document.getElementById('btn-rsvp').classList.add('active');
+                }
+                updateStatus();
+            } catch (e) {
+                console.warn('Could not load saved settings', e);
+            }
+        }
+
+        async function extractTextFromPDF(file) {
+            const arrayBuffer = await file.arrayBuffer();
+            const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer) });
+            const pdf = await loadingTask.promise;
+            let fullText = '';
+            for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+                const page = await pdf.getPage(pageNum);
+                const textContent = await page.getTextContent();
+                const pageText = textContent.items.map(item => item.str).join(' ');
+                fullText += pageText + '\n\n';
+            }
+            return fullText.trim();
+        }
+
+        async function extractTextFromDOCX(file) {
+            const arrayBuffer = await file.arrayBuffer();
+            const result = await mammoth.extractRawText({ arrayBuffer });
+            return result.value.trim();
+        }
+
+        function scrollStep() {
+            if (!isPlaying || isRSVP) return;
+            const scrollableHeight = Math.max(0, scrollTarget.scrollHeight - scrollTarget.clientHeight);
+            if (scrollableHeight <= 0) {
+                pausePlayback();
+                return;
+            }
+            const totalMinutes = Math.max(0.1, words.length / Math.max(1, wpm));
+            const pixelsPerMs = scrollableHeight / (totalMinutes * 60000);
+            const intervalMs = 40;
+            const nextScroll = pixelsPerMs * intervalMs;
+            scrollTarget.scrollTop = Math.min(scrollTarget.scrollTop + nextScroll, scrollableHeight);
+            if (scrollTarget.scrollTop >= scrollableHeight - 5) {
+                pausePlayback();
+                return;
+            }
+        }
+
+        function beginScrollPlayback() {
+            scrollStartAttempts += 1;
+            const scrollableHeight = scrollTarget.scrollHeight - scrollTarget.clientHeight;
+            if (scrollableHeight > 0) {
+                clearInterval(scrollTimer);
+                scrollTimer = window.setInterval(scrollStep, 40);
+                scrollStartAttempts = 0;
+                return;
+            }
+            if (scrollStartAttempts >= 10) {
+                pausePlayback();
+                scrollStartAttempts = 0;
+                return;
+            }
+            requestAnimationFrame(beginScrollPlayback);
+        }
+        function playRSVP() {
+            if (!isPlaying || !isRSVP || rsvpIndex >= words.length) {
+                if (rsvpIndex >= words.length) togglePlay();
+                return;
+            }
+            let word = words[rsvpIndex];
+            if (isBionic) {
+                const splitPoint = Math.ceil(word.length / 2);
+                word = `<b>${word.substring(0, splitPoint)}</b>${word.substring(splitPoint)}`;
+            }
+            rsvpContainer.innerHTML = word;
+            rsvpIndex++;
+            const msPerWord = 60000 / wpm;
+            const delay = (word.includes('.') || word.includes(',')) ? msPerWord * 1.5 : msPerWord;
+            rsvpTimer = setTimeout(playRSVP, delay);
+        }
+
+        function startPlayback() {
+            if (isPlaying) return;
+            isPlaying = true;
+            btnPlay.textContent = 'Pause';
+            toolbar.classList.add('reader-minimized');
+            if (isRSVP) {
+                playRSVP();
+            } else {
+                scrollStartAttempts = 0;
+                beginScrollPlayback();
+            }
+        }
+
+        function pausePlayback() {
+            if (!isPlaying) return;
+            isPlaying = false;
+            btnPlay.textContent = 'Play';
+            clearTimeout(rsvpTimer);
+            clearInterval(scrollTimer);
+            lastScrollTime = 0;
+        }
+
+        function togglePlay() {
+            if (isPlaying) {
+                pausePlayback();
+            } else {
+                startPlayback();
+            }
+        }
+        document.getElementById('btn-start').addEventListener('click', () => {
+            if(!textInput.value) return alert("Please enter some text!");
+            processText(textInput.value);
+            saveSettings();
+            setupArea.style.display = 'none';
+            readerArea.style.display = 'flex';
+            isRSVP = false;
+            document.body.classList.remove('rsvp-active');
+            document.getElementById('btn-rsvp').classList.remove('active');
+            document.getElementById('btn-start').style.display = 'none';
+            btnPlay.style.display = 'inline-block';
+            document.getElementById('btn-stop').style.display = 'inline-block';
+            document.getElementById('wpm-control').style.display = 'flex';
+            document.getElementById('manual-speed-control').style.display = 'flex';
+            document.getElementById('text-size-control').style.display = 'flex';
+            rsvpIndex = 0;
+            scrollContainer.scrollTop = 0;
+                        setTimeout(() => {
+                startPlayback();
+            }, 100);
+        });
+
+        document.getElementById('btn-stop').addEventListener('click', () => {
+            pausePlayback();
+            toolbar.classList.remove('reader-minimized');
+            setupArea.style.display = 'flex';
+            readerArea.style.display = 'none';
+            document.getElementById('btn-start').style.display = 'inline-block';
+            btnPlay.style.display = 'none';
+            document.getElementById('btn-stop').style.display = 'none';
+            document.getElementById('wpm-control').style.display = 'none';
+            document.getElementById('manual-speed-control').style.display = 'none';
+            document.getElementById('text-size-control').style.display = 'none';
+        });
+
+        btnPlay.addEventListener('click', togglePlay);
+
+        function revealReader() {
+            setupArea.style.display = 'none';
+            readerArea.style.display = 'flex';
+            document.body.classList.remove('rsvp-active');
+            document.getElementById('btn-rsvp').classList.remove('active');
+            document.getElementById('btn-start').style.display = 'none';
+            btnPlay.style.display = 'inline-block';
+            document.getElementById('btn-stop').style.display = 'inline-block';
+            document.getElementById('wpm-control').style.display = 'flex';
+            document.getElementById('manual-speed-control').style.display = 'flex';
+            document.getElementById('text-size-control').style.display = 'flex';
+            rsvpIndex = 0;
+            scrollContainer.scrollTop = 0;
+        }
+
+        function brightenHex(hex, percent) {
+            const value = hex.replace('#', '');
+            const num = parseInt(value, 16);
+            const r = Math.min(255, ((num >> 16) & 255) + percent);
+            const g = Math.min(255, ((num >> 8) & 255) + percent);
+            const b = Math.min(255, (num & 255) + percent);
+            return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
+        }
+
+        document.getElementById('btn-bionic').addEventListener('click', (e) => {
+            isBionic = !isBionic;
+            e.target.classList.toggle('active', isBionic);
+            updateBionic();
+            saveSettings();
+        });
+
+        accentColorPicker.addEventListener('input', (e) => {
+            const color = e.target.value;
+            document.documentElement.style.setProperty('--accent', color);
+            document.documentElement.style.setProperty('--accent-strong', brightenHex(color, 24));
+            saveSettings();
+        });
+
+        document.getElementById('btn-rsvp').addEventListener('click', (e) => {
+            isRSVP = !isRSVP;
+            document.body.classList.toggle('rsvp-active');
+            e.target.classList.toggle('active', isRSVP);
+            if (isPlaying) togglePlay();
+            saveSettings();
+        });
+
+        const focusGuide = document.querySelector('.focus-guide');
+        let guideDrag = null;
+
+        function clamp(value, min, max) {
+            return Math.min(Math.max(value, min), max);
+        }
+
+        function updateGuidePosition(left, width) {
+            const safeWidth = clamp(width, 40, 80);
+            const safeLeft = clamp(left, 0, 100 - safeWidth);
+            focusGuide.style.left = `${safeLeft}%`;
+            focusGuide.style.width = `${safeWidth}%`;
+            saveGuideState(safeLeft, safeWidth);
+        }
+
+        function saveGuideState(left, width) {
+            localStorage.setItem('readflow-guide', JSON.stringify({ left, width }));
+        }
+
+        function loadGuideState() {
+            try {
+                const saved = localStorage.getItem('readflow-guide');
+                if (!saved) return;
+                const state = JSON.parse(saved);
+                if (typeof state.left === 'number' && typeof state.width === 'number') {
+                    updateGuidePosition(state.left, state.width);
+                }
+            } catch (e) {
+                console.warn('Could not load guide settings', e);
+            }
+        }
+
+        function handleGuideDrag(e) {
+            if (!guideDrag) return;
+            const readerRect = readerArea.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const delta = clientX - guideDrag.startX;
+            const deltaPercent = delta / readerRect.width * 100;
+
+            let left = guideDrag.startLeft;
+            let width = guideDrag.startWidth;
+
+            if (guideDrag.type === 'move') {
+                left = clamp(guideDrag.startLeft + deltaPercent, 0, 100 - width);
+            } else if (guideDrag.type === 'left') {
+                const nextLeft = clamp(guideDrag.startLeft + deltaPercent, 0, guideDrag.startLeft + guideDrag.startWidth - 40);
+                width = clamp(guideDrag.startWidth - (nextLeft - guideDrag.startLeft), 40, 80);
+                left = nextLeft;
+            } else if (guideDrag.type === 'right') {
+                width = clamp(guideDrag.startWidth + deltaPercent, 40, 80);
+            }
+
+            updateGuidePosition(left, width);
+        }
+
+        function endGuideDrag() {
+            if (!guideDrag) return;
+            guideDrag = null;
+            window.removeEventListener('mousemove', handleGuideDrag);
+            window.removeEventListener('mouseup', endGuideDrag);
+            window.removeEventListener('touchmove', handleGuideDrag);
+            window.removeEventListener('touchend', endGuideDrag);
+        }
+
+        function startGuideDrag(e) {
+            const rect = focusGuide.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const offsetX = clientX - rect.left;
+            const edgeThreshold = 18;
+            const currentLeft = parseFloat(focusGuide.style.left) || 20;
+            const currentWidth = parseFloat(focusGuide.style.width) || 58;
+
+            let type = 'move';
+            if (offsetX < edgeThreshold) type = 'left';
+            else if (offsetX > rect.width - edgeThreshold) type = 'right';
+
+            guideDrag = {
+                type,
+                startX: clientX,
+                startLeft: currentLeft,
+                startWidth: currentWidth
+            };
+
+            window.addEventListener('mousemove', handleGuideDrag);
+            window.addEventListener('mouseup', endGuideDrag);
+            window.addEventListener('touchmove', handleGuideDrag, { passive: false });
+            window.addEventListener('touchend', endGuideDrag);
+            e.preventDefault();
+        }
+
+        focusGuide.addEventListener('pointermove', (e) => {
+            const rect = focusGuide.getBoundingClientRect();
+            const offsetX = e.clientX - rect.left;
+            const edge = 18;
+            if (offsetX < edge || offsetX > rect.width - edge) {
+                focusGuide.style.cursor = 'ew-resize';
+            } else {
+                focusGuide.style.cursor = 'grab';
+            }
+        });
+
+        focusGuide.addEventListener('mousedown', startGuideDrag);
+        focusGuide.addEventListener('touchstart', startGuideDrag, { passive: false });
+
+        loadGuideState();
+
+        function updateSliderBackground(slider) {
+            const value = (slider.value - slider.min) / (slider.max - slider.min) * 100;
+            slider.style.backgroundSize = value + '% 100%';
+        }
+
+        wpmSlider.addEventListener('input', (e) => {
+            wpm = Number(e.target.value);
+            wpmDisplay.textContent = wpm;
+            manualSpeedInput.value = wpm;
+            updateSliderBackground(e.target);
+            updateStatus();
+            saveSettings();
+        });
+
+        // Initialize slider backgrounds
+        updateSliderBackground(wpmSlider);
+        updateSliderBackground(textSizeSlider);
+        textSizeSlider.addEventListener('input', (e) => {
+            applyTextSize(Number(e.target.value));
+            updateSliderBackground(e.target);
+            saveSettings();
+        });
+
+        manualSpeedInput.addEventListener('input', (e) => {
+            const value = Number(e.target.value);
+            if (!value || value < 60 || value > 1000) return;
+            wpm = value;
+            wpmSlider.value = wpm;
+            wpmDisplay.textContent = wpm;
+            updateStatus();
+            saveSettings();
+        });
+
+        document.getElementById('theme-select').addEventListener('change', (e) => {
+            document.documentElement.setAttribute('data-theme', e.target.value);
+            saveSettings();
+        });
+
+        document.getElementById('font-select').addEventListener('change', (e) => {
+            document.documentElement.style.setProperty('--font-family', e.target.value);
+            saveSettings();
+        });
+
+        // File Loading
+        document.getElementById('file-input').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) {
+                document.getElementById('file-name-display').textContent = '';
+                return;
+            }
+            
+            // Display the selected filename
+            document.getElementById('file-name-display').textContent = file.name;
+
+            let loadedText = '';
+            if (file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {
+                loadedText = await extractTextFromPDF(file);
+            } else if (file.name.toLowerCase().endsWith('.docx')) {
+                loadedText = await extractTextFromDOCX(file);
+            } else {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    loadedText = event.target.result;
+                    textInput.value = loadedText;
+                    processText(loadedText);
+                    saveSettings();
+                };
+                reader.readAsText(file);
+                return;
+            }
+
+            if (loadedText) {
+                textInput.value = loadedText;
+                processText(loadedText);
+                saveSettings();
+            }
+        });
+
+        btnPaste.addEventListener('click', async () => {
+            try {
+                const clipboardText = await navigator.clipboard.readText();
+                if (!clipboardText) {
+                    alert('Clipboard is empty or not supported.');
+                    return;
+                }
+                textInput.value = clipboardText;
+                processText(clipboardText);
+                saveSettings();
+            } catch (err) {
+                alert('Unable to paste from clipboard. Please use Ctrl+V or check browser permissions.');
+            }
+        });
+
+        textInput.addEventListener('input', () => {
+            saveSettings();
+            if (textInput.value.trim()) {
+                processText(textInput.value);
+            } else {
+                words = [];
+                updateStatus();
+            }
+        });
+
+        loadSettings();
+
+        // Spacebar to pause/play
+        document.addEventListener('keydown', (e) => {
+            if(e.code === 'Space' && readerArea.style.display === 'flex') {
+                e.preventDefault();
+                togglePlay();
+            }
+        });
+
+        // Register Service Worker for PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').catch(err => console.log('SW setup failed:', err));
+            });
+        }
+    </script>
+</body>
+</html>
